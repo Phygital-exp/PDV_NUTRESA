@@ -1,26 +1,23 @@
 let debounceTimer;
 let fuse = null;
-let allData = { pdv: [], producto: [] };
+let allData = [];
 let fullData = [];
+let allEventos = [];
+let selectedEvento = null;
 
+// Endpoint actual
+const DATA_URL = 'https://botai.smartdataautomation.com/api_backend_ai/dinamic-db/report/119/pdv_nutresa';
 const PDV_URL = 'https://kimby-production.up.railway.app/api/kimby/pdv';
-const PRODUCTO_URL = 'https://kimby-production.up.railway.app/api/kimby/producto';
 
 async function loadData() {
     try {
-        if (!allData.pdv.length) {
-            const pdvResponse = await fetch(PDV_URL);
-            const json = await pdvResponse.json();
-            allData.pdv = json.result || [];
+        if (!allData.length) {
+            const response = await fetch(DATA_URL);
+            const json = await response.json();
+            allData = json.result || [];
+            extractEventos();
+            populateEventDropdown();
         }
-
-        if (!allData.producto.length) {
-            const productoResponse = await fetch(PRODUCTO_URL);
-            const json = await productoResponse.json();
-            allData.producto = json.result || [];
-        }
-
-        updatePlaceholder();
     } catch (error) {
         console.error("Error al cargar datos:", error);
         document.getElementById('results').innerHTML = `
@@ -29,26 +26,48 @@ async function loadData() {
     }
 }
 
-function updatePlaceholder() {
-    const searchType = document.getElementById('searchType').value;
-    const searchInput = document.getElementById('searchInput');
-
-    searchInput.placeholder = searchType === 'pdv' 
-        ? 'Ingresa palabra clave del PDV' 
-        : 'Ingresa palabra clave del producto';
-
-    searchInput.value = '';
-    document.getElementById('results').innerHTML = '';
-
-    fullData = allData[searchType] || [];
-    initializeFuse(searchType);
+function extractEventos() {
+    const eventosSet = new Set();
+    allData.forEach(item => {
+        if (item.EVENTO) {
+            eventosSet.add(item.EVENTO);
+        }
+    });
+    allEventos = Array.from(eventosSet).sort();
 }
 
-function initializeFuse(type) {
+function populateEventDropdown() {
+    const eventSelect = document.getElementById('eventSelect');
+    eventSelect.innerHTML = '<option value="">Selecciona un evento</option>';
+    allEventos.forEach(evento => {
+        const option = document.createElement('option');
+        option.value = evento;
+        option.textContent = evento;
+        eventSelect.appendChild(option);
+    });
+}
+
+function updateEventSelection() {
+    const evento = document.getElementById('eventSelect').value;
+    const searchInput = document.getElementById('searchInput');
+    
+    selectedEvento = evento;
+    searchInput.value = '';
+    document.getElementById('results').innerHTML = '';
+    
+    if (evento) {
+        searchInput.disabled = false;
+        fullData = allData.filter(item => item.EVENTO === evento);
+        initializeFuse();
+    } else {
+        searchInput.disabled = true;
+        fullData = [];
+    }
+}
+
+function initializeFuse() {
     const options = {
-        keys: type === 'pdv'
-            ? ['SAP', 'REGION', 'CIUDAD', 'CADENA', 'PDV']
-            : ['SAP', 'SUBCATEGORIA', 'REFERENCIA', 'NOM_PRODUCTO'],
+        keys: ['SAP', 'PDV', 'CIUDAD', 'DIRECCION', 'MARCA'],
         threshold: 0.3,
     };
     fuse = new Fuse(fullData, options);
@@ -73,32 +92,27 @@ function performSearch(query) {
 }
 
 function renderResults(results) {
-    const type = document.getElementById('searchType').value;
     let output = `<h2>Resultados (${results.length} encontrados):</h2>`;
 
     if (results.length > 0) {
         results.forEach(result => {
-            const nombre = result.PDV || result.NOM_PRODUCTO;
-            const claseTipo = result.PDV ? 'pdv' : 'producto';
+            const nombre = result.PDV || 'Sin nombre';
 
             output += `
-                <div class="result-item ${claseTipo}" role="region" aria-label="${nombre}">
+                <div class="result-item pdv" role="region" aria-label="${nombre}">
                     <h3>
-                        <i class="material-icons icon-tipo">${result.PDV ? 'store' : 'inventory_2'}</i>
+                        <i class="material-icons icon-tipo">store</i>
                         ${nombre}
                     </h3>
                     <div class="tags">
                         ${result.CIUDAD ? `<span class="tag ciudad">${result.CIUDAD}</span>` : ''}
-                        ${result.CADENA ? `<span class="tag cadena">${result.CADENA}</span>` : ''}
-                        ${result.REGION ? `<span class="tag region">${result.REGION}</span>` : ''}
-                        ${result.SUBCATEGORIA ? `<span class="tag subcategoria">${result.SUBCATEGORIA}</span>` : ''}
+                        ${result.MARCA ? `<span class="tag marca">${result.MARCA}</span>` : ''}
                     </div>
                     <ul>
                         <li><strong>SAP:</strong> ${result.SAP}
                             <i class="material-icons copy-icon" role="button" tabindex="0" aria-label="Copiar SAP" onclick="copyToClipboard('${result.SAP}')">content_copy</i>
                         </li>
-                        ${result.CANAL ? `<li><strong>Canal:</strong> ${result.CANAL}</li>` : ''}
-                        ${result.REFERENCIA ? `<li><strong>Referencia:</strong> ${result.REFERENCIA}</li>` : ''}
+                        <li><strong>Dirección:</strong> ${result.DIRECCION || 'N/A'}</li>
                     </ul>
                 </div>
             `;
@@ -134,7 +148,6 @@ window.onload = () => {
     document.body.classList.toggle('dark-mode', isDark);
     document.getElementById('darkModeToggle').checked = isDark;
     document.getElementById('darkModeLabel').textContent = isDark ? '☀️ Modo claro' : '🌙 Modo oscuro';
-    document.getElementById('searchInput').focus();
 };
 
 loadData();

@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buscador Kimby</title>
+    <title>Buscador Nutresa</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="icon" href="kimby.jpg" type="image/png">
+    <link rel="icon" href="nutresa.jpg" type="image/png">
 </head>
 <body>
-    <div class="search-container" role="search" aria-label="Buscador Midea de PDV y Productos">
-        <h1 class="searchTitle"id="searchTitle">Búsqueda datos Kimby</h1>
+    <div class="search-container" role="search" aria-label="Buscador Nutresa de PDVs por Evento">
+        <h1 class="searchTitle"id="searchTitle">Búsqueda PDVs Nutresa</h1>
 
         <div style="text-align: center; margin-bottom: 15px;">
             <label class="switch">
@@ -20,12 +20,11 @@
             <span id="darkModeLabel">🌙 Modo oscuro</span>
         </div>
 
-        <select id="searchType" onchange="updatePlaceholder()">
-            <option value="pdv">Buscar PDV</option>
-            <option value="producto">Buscar Producto</option>
+        <select id="eventSelect" onchange="updateEventSelection()" aria-label="Seleccionar evento">
+            <option value="">Selecciona un evento</option>
         </select>
 
-        <input type="text" id="searchInput" placeholder="Ingresa el nombre PDV" oninput="handleInput()" aria-label="Campo de búsqueda">
+        <input type="text" id="searchInput" placeholder="Ingresa palabra clave del PDV" oninput="handleInput()" aria-label="Campo de búsqueda" disabled>
 
         <div id="results"></div>
     </div>
@@ -34,5 +33,3 @@
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
 </body>
 </html>
-<!-- Forzar deploy limpio -->
-
