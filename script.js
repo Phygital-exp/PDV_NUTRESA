@@ -5,9 +5,14 @@ let fullData = [];
 let allEventos = [];
 let selectedEvento = null;
 
-// Endpoint actual
-const DATA_URL = 'https://botai.smartdataautomation.com/api_backend_ai/dinamic-db/report/119/pdv_nutresa';
-const PDV_URL = 'https://kimby-production.up.railway.app/api/kimby/pdv';
+// Endpoint directo
+// const DATA_URL = 'https://botai.smartdataautomation.com/api_backend_ai/dinamic-db/report/119/pdv_nutresa';
+
+// Endpoint de Railway (proxy Nutresa)
+const DATA_URL = 'https://pdvnutresa-production.up.railway.app/api/nutresa/pdv';
+
+// Endpoints anteriores de Kimby (descomentar para usar):
+// const KIMBY_PDV_URL = 'https://kimby-production.up.railway.app/api/kimby/pdv';
 
 async function loadData() {
     try {
