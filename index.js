@@ -12,10 +12,10 @@ const AUTH_HEADERS = {
 
 app.use(cors());
 
-app.get("/api/kimby/pdv", async (req, res) => {
+app.get("/api/nutresa/pdv", async (req, res) => {
     try {
         const response = await fetch(
-            "https://botai.smartdataautomation.com/api_backend_ai/dinamic-db/report/119/KimbyPDVs",
+            "https://botai.smartdataautomation.com/api_backend_ai/dinamic-db/report/119/pdv_nutresa",
             { headers: AUTH_HEADERS }
         );
         
@@ -33,10 +33,11 @@ app.get("/api/kimby/pdv", async (req, res) => {
     }
 });
 
-app.get("/api/kimby/producto", async (req, res) => {
+// Endpoint legacy de Kimby (para compatibilidad)
+app.get("/api/kimby/pdv", async (req, res) => {
     try {
         const response = await fetch(
-            "https://botai.smartdataautomation.com/api_backend_ai/dinamic-db/report/119/KimbyPortafolioProductos",
+            "https://botai.smartdataautomation.com/api_backend_ai/dinamic-db/report/119/pdv_nutresa",
             { headers: AUTH_HEADERS }
         );
         
@@ -50,7 +51,7 @@ app.get("/api/kimby/producto", async (req, res) => {
         res.json(data);
     } catch (err) {
         console.error("❌ Error en el proxy:", err);
-        res.status(500).json({ error: "Error al obtener datos del portafolio", details: err.message });
+        res.status(500).json({ error: "Error al obtener datos del PDV", details: err.message });
     }
 });
 
